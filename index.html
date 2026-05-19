@@ -44,6 +44,31 @@
     z-index: 100;
     transform: translate(-50%, -50%);
   }
+  .compass-tape {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .compass-tape.visible { opacity: 1; }
+  .compass-lubber {
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 44px;
+    background: rgba(140, 200, 255, 0.5);
+    z-index: 51;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .compass-lubber.visible { opacity: 1; }
   @media (max-width: 768px) {
     html, body {
       overflow: hidden;
@@ -54,6 +79,8 @@
     }
     .cursor-ring, .cursor-dot { display: none; }
     .scroll-spacer { display: none; }
+    .compass-tape { bottom: 16px; }
+    .compass-lubber { bottom: 14px; }
   }
 </style>
 </head>
@@ -63,6 +90,8 @@
 <div class="cursor-dot" id="cursorDot"></div>
 
 <canvas id="gl"></canvas>
+<canvas id="compass" class="compass-tape" width="320" height="40"></canvas>
+<div class="compass-lubber" id="lubber"></div>
 <div class="scroll-spacer" id="spacer"></div>
 
 <script type="importmap">
@@ -412,6 +441,94 @@ function updateTextures(idx, blend) {
   mat.uniforms.uBlend.value = blend;
 }
 
+// ─── Compass Tape ───
+const compassCanvas = document.getElementById('compass');
+const compassCtx = compassCanvas.getContext('2d');
+const lubber = document.getElementById('lubber');
+const COMPASS_W = 320;
+const COMPASS_H = 40;
+const DEG_PER_PX = 0.6;
+const CARDINALS = { 0: 'N', 90: 'E', 180: 'S', 270: 'W' };
+
+let compassVisible = false;
+let compassFadeTimer = null;
+let lastDeg = -1;
+
+function showCompass() {
+  if (!compassVisible) {
+    compassCanvas.classList.add('visible');
+    lubber.classList.add('visible');
+    compassVisible = true;
+  }
+  clearTimeout(compassFadeTimer);
+  compassFadeTimer = setTimeout(() => {
+    compassCanvas.classList.remove('visible');
+    lubber.classList.remove('visible');
+    compassVisible = false;
+  }, 2000);
+}
+
+function drawCompass(deg) {
+  if (Math.abs(deg - lastDeg) < 0.05) return;
+  lastDeg = deg;
+  showCompass();
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  if (compassCanvas.width !== COMPASS_W * dpr) {
+    compassCanvas.width = COMPASS_W * dpr;
+    compassCanvas.height = COMPASS_H * dpr;
+    compassCanvas.style.width = COMPASS_W + 'px';
+    compassCanvas.style.height = COMPASS_H + 'px';
+  }
+
+  const ctx = compassCtx;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, COMPASS_W, COMPASS_H);
+
+  const centerX = COMPASS_W / 2;
+  const halfSpan = (COMPASS_W / 2) * DEG_PER_PX;
+  const startDeg = deg - halfSpan;
+  const endDeg = deg + halfSpan;
+
+  for (let d = Math.floor(startDeg); d <= Math.ceil(endDeg); d++) {
+    const normD = ((d % 360) + 360) % 360;
+    const px = centerX + (d - deg) / DEG_PER_PX;
+    if (px < -10 || px > COMPASS_W + 10) continue;
+
+    const isCardinal = normD % 90 === 0;
+    const is30 = normD % 30 === 0;
+    const is10 = normD % 10 === 0;
+    const is5 = normD % 5 === 0;
+
+    if (!is5) continue;
+
+    let h, alpha;
+    if (isCardinal) { h = 20; alpha = 0.7; }
+    else if (is30) { h = 14; alpha = 0.5; }
+    else if (is10) { h = 9; alpha = 0.35; }
+    else { h = 5; alpha = 0.2; }
+
+    ctx.beginPath();
+    ctx.moveTo(px, COMPASS_H);
+    ctx.lineTo(px, COMPASS_H - h);
+    ctx.strokeStyle = `rgba(140, 200, 255, ${alpha})`;
+    ctx.lineWidth = isCardinal ? 1.2 : 0.8;
+    ctx.stroke();
+
+    if (isCardinal && CARDINALS[normD]) {
+      ctx.font = '500 9px "SF Mono", "Fira Code", monospace';
+      ctx.fillStyle = 'rgba(140, 200, 255, 0.7)';
+      ctx.textAlign = 'center';
+      ctx.fillText(CARDINALS[normD], px, COMPASS_H - h - 4);
+    } else if (is30) {
+      ctx.font = '400 7.5px "SF Mono", "Fira Code", monospace';
+      ctx.fillStyle = 'rgba(140, 200, 255, 0.4)';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(normD).padStart(3, '0'), px, COMPASS_H - h - 3);
+    }
+  }
+}
+
 // ─── Cursor ───
 let mx = 0, my = 0, cx = 0, cy = 0;
 const ring = document.getElementById('cursorRing');
@@ -457,6 +574,9 @@ function animate() {
 
   updateTextures(idx, blend);
   mat.uniforms.uTime.value = t;
+
+  const degrees = (floatIdx / N) * 360;
+  drawCompass(degrees);
 
   cx += (mx - cx) * 0.1;
   cy += (my - cy) * 0.1;
