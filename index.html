@@ -45,8 +45,15 @@
     transform: translate(-50%, -50%);
   }
   @media (max-width: 768px) {
-    body { cursor: auto; }
+    html, body {
+      overflow: hidden;
+      height: 100%;
+      position: fixed;
+      width: 100%;
+      cursor: auto;
+    }
     .cursor-ring, .cursor-dot { display: none; }
+    .scroll-spacer { display: none; }
   }
 </style>
 </head>
@@ -349,6 +356,34 @@ const mat = new THREE.ShaderMaterial({
 const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
 scene.add(quad);
 
+// ─── Touch-driven scroll for mobile ───
+let virtualScroll = 0;
+let touchStartY = 0;
+let touchLastY = 0;
+let touchVelocity = 0;
+
+if (isMobile) {
+  document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchLastY = touchStartY;
+    touchVelocity = 0;
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const y = e.touches[0].clientY;
+    const delta = touchLastY - y;
+    virtualScroll += delta * 2.5;
+    if (virtualScroll < 0) virtualScroll += LOOP_PX;
+    touchVelocity = delta;
+    touchLastY = y;
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    // momentum handled in animate loop
+  });
+}
+
 // ─── State ───
 let smoothScroll = 0;
 let scrollSpeed = 0;
@@ -393,7 +428,15 @@ function animate() {
   requestAnimationFrame(animate);
   const t = performance.now() * 0.001;
 
-  const scrollY = window.scrollY;
+  let scrollY;
+  if (isMobile) {
+    touchVelocity *= 0.92;
+    virtualScroll += touchVelocity * 0.5;
+    if (virtualScroll < 0) virtualScroll += LOOP_PX;
+    scrollY = virtualScroll;
+  } else {
+    scrollY = window.scrollY;
+  }
   smoothScroll += (scrollY - smoothScroll) * 0.1;
   scrollSpeed = Math.abs(scrollY - prevScroll) / (1000 / 60);
   prevScroll = scrollY;
