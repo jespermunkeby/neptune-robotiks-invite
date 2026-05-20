@@ -1,0 +1,27 @@
+{
+  "name": "sweet",
+  "params": {
+    "grain": 1,
+    "smear": 0.41,
+    "bleed": 1.71,
+    "haze": 1,
+    "scanlines": 1,
+    "vignette": 1,
+    "saturation": 1.21,
+    "contrast": 1.33,
+    "brightness": 1,
+    "dissolveSoftness": 0.25,
+    "moshInfluence": 1,
+    "drift": 0,
+    "spread": 4,
+    "threshold": 0.06,
+    "thresholdSoft": 0.1,
+    "posterize": 0.76,
+    "solarize": 0.51,
+    "halftone": 0,
+    "invert": 0,
+    "edgeGlow": 0.48,
+    "pixelate": 0,
+    "colorShift": 0
+  }
+}

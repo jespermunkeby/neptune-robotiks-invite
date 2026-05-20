@@ -1,0 +1,27 @@
+{
+  "name": "sweet2",
+  "params": {
+    "grain": 0,
+    "smear": 2.18,
+    "bleed": 3.64,
+    "haze": 0,
+    "scanlines": 2.5,
+    "vignette": 1.11,
+    "saturation": 1.16,
+    "contrast": 1.23,
+    "brightness": 1,
+    "dissolveSoftness": 0.45,
+    "moshInfluence": 1.94,
+    "drift": 1.29,
+    "spread": 13.1,
+    "threshold": 0.62,
+    "thresholdSoft": 0.305,
+    "posterize": 0.25,
+    "solarize": 0.45,
+    "halftone": 0.25,
+    "invert": 0.04,
+    "edgeGlow": 2,
+    "pixelate": 0,
+    "colorShift": 0
+  }
+}

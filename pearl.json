@@ -1,0 +1,27 @@
+{
+  "name": "pearl",
+  "params": {
+    "grain": 1,
+    "smear": 0.41,
+    "bleed": 1.71,
+    "haze": 1,
+    "scanlines": 1.43,
+    "vignette": 1.07,
+    "saturation": 1.21,
+    "contrast": 1.33,
+    "brightness": 1,
+    "dissolveSoftness": 0.25,
+    "moshInfluence": 1,
+    "drift": 0,
+    "spread": 4,
+    "threshold": 0.39,
+    "thresholdSoft": 0.345,
+    "posterize": 0.81,
+    "solarize": 0.8,
+    "halftone": 0,
+    "invert": 1,
+    "edgeGlow": 0.18,
+    "pixelate": 0,
+    "colorShift": 0.96
+  }
+}

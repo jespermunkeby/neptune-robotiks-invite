@@ -1,0 +1,27 @@
+{
+  "name": "new default",
+  "params": {
+    "grain": 1,
+    "smear": 3,
+    "bleed": 1.71,
+    "haze": 1,
+    "scanlines": 1.43,
+    "vignette": 1.07,
+    "saturation": 0.55,
+    "contrast": 2.42,
+    "brightness": 1.23,
+    "dissolveSoftness": 0.25,
+    "moshInfluence": 1,
+    "drift": 0,
+    "spread": 4,
+    "threshold": 0,
+    "thresholdSoft": 0.24,
+    "posterize": 0.92,
+    "solarize": 0.82,
+    "halftone": 0,
+    "invert": 0.17,
+    "edgeGlow": 0,
+    "pixelate": 0,
+    "colorShift": 0.945
+  }
+}
